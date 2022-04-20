@@ -6,6 +6,10 @@
   "scripts": {
     "api": "cd server && node server.js"
   },
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "author": "Taz Hinkle <hinkle.taz@gmail.com>",
   "license": "MIT",
   "private": true,
