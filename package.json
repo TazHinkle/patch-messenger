@@ -1,0 +1,19 @@
+{
+  "name": "patch-messenger",
+  "version": "1.0.0",
+  "description": "2 way SMS messenger app",
+  "main": "server/server.js",
+  "scripts": {
+    "api": "cd server && node server.js"
+  },
+  "author": "Taz Hinkle <hinkle.taz@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@vscode/sqlite3": "^5.0.8",
+    "koa": "^2.13.4",
+    "koa-body": "^4.2.0",
+    "koa-router": "^10.1.1",
+    "vue": "^2.6.14"
+  }
+}
