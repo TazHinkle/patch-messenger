@@ -1,18 +1,31 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-container>
+    <p
+      v-for="conversation in conversations"
+      :key="conversation.conversation_id"
+    >{{conversation.contact_number}}</p>
+    <p>Words</p>
+  </v-container>
 </template>
-
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
+  data () {
+    return {
+      conversations: [],
+      messages: []
+    }
+  },
+  created () {
+    this.loadConversations()
+  },
+  methods: {
+    async loadConversations () {
+      const response = await fetch(
+        '/api/conversations'
+      )
+      this.conversations = await response.json()
+      console.log(response)
+    }
   }
 }
 </script>

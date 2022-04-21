@@ -4,11 +4,10 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 const twilioPhone = process.env.TWILIO_PHONE_OUT
 const Koa = require('koa')
+const app = new Koa()
 const Router = require('koa-router')
 const router = new Router()
 const db = require('./db.js');
-
-const app = new Koa()
 
 router.get('/api/conversations', async (ctx) => {
     ctx.body = await db.getAllConversations()
