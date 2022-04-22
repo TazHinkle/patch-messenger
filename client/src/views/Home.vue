@@ -43,7 +43,7 @@
               <v-btn
                 color="blue darken-1"
                 text
-                @click="addNewConvo = false"
+                @click="addNewConvo = !addNewConvo"
               >
                 Close
               </v-btn>
@@ -65,14 +65,14 @@
         <v-list-item
           v-for="conversation in conversations"
           :key="conversation.conversation_id"
+          @click="selectConversation(conversation.conversation_id)"
+          :id="'conversation-button-'+conversation.conversation_id"
+          :disabled="selectedConversation === conversation.conversation_id"
+          link
         >
           <v-list-item-content>
             <v-list-item-title>
-              <v-btn
-                :id="'conversation-button-'+conversation.conversation_id"
-                @click="selectConversation(conversation.conversation_id)"
-                :disabled="selectedConversation === conversation.conversation_id"
-              >{{ conversation.contact_number }}</v-btn>
+              {{ conversation.contact_number }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -130,7 +130,7 @@ export default {
       this.loadConversations()
     },
     validateNumber () {
-      const reg = /\+1[0-9]{10}$/g
+      const reg = /^\+1[0-9]{10}$/g
       return reg.test(this.newContactNumber)
     },
     async startConversation () {
@@ -148,13 +148,14 @@ export default {
           requestOptions
         )
         this.response = await response.json()
-        this.selectedConversation = this.response.result.conversation_id
-        this.conversations.push(this.response.result)
+        console.log(this.response)
+        this.selectedConversation = this.response.conversation_id
+        console.log(this.selectedConversation)
+        this.conversations.push(this.response)
         this.newContactNumber = '+1'
         this.messages = []
         this.addNewConvo = false
       } else {
-        this.newContactNumber = '+1'
         this.error = 'Must be a valid phone number prefaced by a +'
       }
     }
