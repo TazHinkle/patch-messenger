@@ -13,6 +13,17 @@ router.get('/api/conversations', async (ctx) => {
     ctx.body = await db.getAllConversations()
 })
 
+router.get('/api/conversations/:conversation_id', async (ctx) => {
+    ctx.body = await db.getMessagesByConversationId(ctx.params.conversation_id)
+})
+
+router.post('/api/conversations', async (ctx) => {
+    let conversation = ctx.request.body
+    conversation = await db.startConversation(conversation.contact_number)
+    ctx.response.status = 200
+    ctx.body = conversation
+})
+
 app.use(require('koa-body')())
 app.use(router.allowedMethods())
 app.use(router.routes())

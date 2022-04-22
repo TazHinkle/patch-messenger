@@ -1,18 +1,115 @@
 <template>
-  <v-container>
-    <p
-      v-for="conversation in conversations"
-      :key="conversation.conversation_id"
-    >{{conversation.contact_number}}</p>
-    <p>Words</p>
-  </v-container>
+  <v-app id="inspire">
+    <v-navigation-drawer
+      app
+      permanent
+    >
+      <br />
+      <v-row justify="center">
+        <v-dialog
+          v-model="addNewConvo"
+          scrollable
+          max-width="300px"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="mx-2"
+              fab
+              dark
+              color="indigo"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon dark>
+                mdi-plus
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title>Enter a Phone Number</v-card-title>
+            <v-divider></v-divider>
+            <v-card-text style="height: 300px;">
+              <v-text-field
+                label="Start a new conversation"
+                hint="Valid phone numbers must be prefaced with +1"
+                persistent-hint
+                required
+                v-model="newContactNumber"
+              ></v-text-field>
+              <span v-if="error" class="error--text">{{ error }}</span>
+            </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="addNewConvo = false"
+              >
+                Close
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="startConversation"
+              >
+                Create
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
+      <br />
+      <v-divider></v-divider>
+
+      <v-list>
+        <v-list-item
+          v-for="conversation in conversations"
+          :key="conversation.conversation_id"
+        >
+          <v-list-item-content>
+            <v-list-item-title>
+              <v-btn
+                :id="'conversation-button-'+conversation.conversation_id"
+                @click="selectConversation(conversation.conversation_id)"
+                :disabled="selectedConversation === conversation.conversation_id"
+              >{{ conversation.contact_number }}</v-btn>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <v-container
+        class="py-8 px-6"
+        fluid
+      >
+        <v-row>
+          <v-col
+            v-for="message in messages"
+            :key="message.message_id"
+            cols="12"
+          >
+            <v-card>
+              <v-subheader></v-subheader>
+              <v-card-text>{{message.message_body}}</v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 <script>
 export default {
   data () {
     return {
       conversations: [],
-      messages: []
+      messages: [],
+      selectedConversation: '',
+      addNewConvo: false,
+      newContactNumber: '+1',
+      error: ''
     }
   },
   created () {
@@ -25,6 +122,41 @@ export default {
       )
       this.conversations = await response.json()
       console.log(response)
+    },
+    async selectConversation (conversationId) {
+      this.selectedConversation = conversationId
+      const response = await fetch(`/api/conversations/${conversationId}`)
+      this.messages = await response.json()
+      this.loadConversations()
+    },
+    validateNumber () {
+      const reg = /\+1[0-9]{10}$/g
+      return reg.test(this.newContactNumber)
+    },
+    async startConversation () {
+      this.error = ''
+      if (this.validateNumber()) {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contact_number: this.newContactNumber
+          })
+        }
+        const response = await fetch(
+          '/api/conversations',
+          requestOptions
+        )
+        this.response = await response.json()
+        this.selectedConversation = this.response.result.conversation_id
+        this.conversations.push(this.response.result)
+        this.newContactNumber = '+1'
+        this.messages = []
+        this.addNewConvo = false
+      } else {
+        this.newContactNumber = '+1'
+        this.error = 'Must be a valid phone number prefaced by a +'
+      }
     }
   }
 }
