@@ -79,7 +79,9 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main
+      class="pb-0"
+    >
       <v-container
         class="py-8 px-6"
         fluid
@@ -91,13 +93,48 @@
             cols="12"
           >
             <v-card>
-              <v-subheader></v-subheader>
-              <v-card-text>{{message.message_body}}</v-card-text>
+              <v-subheader>{{ convertTimestamp(message.timestamp) }}</v-subheader>
+              <v-card-text>{{ message.message_body }}</v-card-text>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
     </v-main>
+    <v-footer
+      app
+      color="gray"
+      height="72"
+      inset
+      class="pa-0"
+    >
+      <v-form
+        @submit.prevent="sendMessage"
+        class="d-flex flex-grow-1"
+      >
+        <v-container
+          class="py-0"
+        >
+          <v-row>
+            <v-col
+              cols="12"
+              class="py-0"
+            >
+              <v-text-field
+                label="Send a new message"
+                v-model="addMessage"
+                @keyup.enter="sendMessage"
+                append-outer-icon="mdi-send"
+                @click:append-outer="sendMessage"
+                dense
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <span v-if="error && !selectedConversation" class="error--text">{{ error }}</span>
+          </v-row>
+        </v-container>
+      </v-form>
+    </v-footer>
   </v-app>
 </template>
 <script>
@@ -109,6 +146,8 @@ export default {
       selectedConversation: '',
       addNewConvo: false,
       newContactNumber: '+1',
+      addMessage: '',
+      response: '',
       error: ''
     }
   },
@@ -125,7 +164,7 @@ export default {
     },
     async selectConversation (conversationId) {
       this.selectedConversation = conversationId
-      const response = await fetch(`/api/conversations/${conversationId}`)
+      const response = await fetch(`/api/conversations/${conversationId}/messages`)
       this.messages = await response.json()
       this.loadConversations()
     },
@@ -157,6 +196,33 @@ export default {
         this.addNewConvo = false
       } else {
         this.error = 'Must be a valid phone number prefaced by a +'
+      }
+    },
+    convertTimestamp (timestamp) {
+      const day = new Date(timestamp)
+      return '' + day.toLocaleDateString('en-US') + ' ' + day.toTimeString()
+    },
+    async sendMessage () {
+      console.log(this.addMessage)
+      this.error = ''
+      if (this.selectedConversation && this.addMessage) {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: this.addMessage
+          })
+        }
+        const response = await fetch(
+          `/api/conversations/${this.selectedConversation}/send`,
+          requestOptions
+        )
+        const result = await response.json()
+        console.log(result)
+        this.messages.push(result)
+        this.addMessage = ''
+      } else {
+        this.error = 'You must select a conversation and type a message'
       }
     }
   }

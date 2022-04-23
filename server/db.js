@@ -14,15 +14,31 @@ const getAllConversations = async () => {
     return statement.all()
 }
 
-const findConversationById = async (conversation_id) => {}
+const getConversationById = async (conversation_id) => {
+    const db = await openDb
+    let statement = await db.prepare('SELECT * FROM conversations WHERE conversation_id = @conversation_id'
+    )
+    statement.bind({
+        '@conversation_id': conversation_id,
+    })
+    return statement.get()
+}
 
-const findConversationByContactNumber = async (contact_number) => {}
+const getConversationByContactNumber = async (contact_number) => {
+    const db = await openDb
+    let statement = await db.prepare('SELECT * FROM conversations WHERE contact_number = @contact_number'
+    )
+    statement.bind({
+        '@contact_number': contact_number,
+    })
+    return statement.get()
+}
 
 const getMessagesByConversationId = async (conversation_id) => {
     const db = await openDb
     let statement = await db.prepare('SELECT * FROM messages WHERE conversation_id = @conversation_id'
     )
-    statement.bind({
+    await statement.bind({
         '@conversation_id': conversation_id,
     })
     await db.run(
@@ -44,12 +60,39 @@ const startConversation = async (contact_number) => {
     return row.get()
 }
 
-const updateConversation = async (conversation_id, is_incoming) => {
-    if(is_incoming) {
-
-    }else {
-
-    }
+const updateConversation = async (conversation_id) => {
+    const db = await openDb
+    let timestamp = Date.now()
+    await db.run(
+        'UPDATE CONVERSATIONS SET last_incoming_message_at = ?, unread_message_count = unread_message_count + 1 WHERE conversation_id = ?',
+        timestamp,
+        conversation_id
+    )
 }
 
-module.exports = { getAllConversations, getMessagesByConversationId, startConversation }
+const createMessageInConversation = async (message_body, timestamp, conversation_id, is_incoming) => {
+    const db = await openDb
+    const messageInsert = await db.run(
+        'INSERT INTO MESSAGES (conversation_id, message_body, is_incoming, timestamp) ' +
+        'VALUES(?, ?, ?, ?)',
+        conversation_id,
+        message_body,
+        is_incoming,
+        timestamp
+    )
+    const row = await db.prepare('SELECT * FROM MESSAGES WHERE message_id = @id')
+    await row.bind({'@id': messageInsert.lastID})
+    if (is_incoming) {
+        await updateConversation(conversation_id, timestamp)
+    }
+    return row.get()
+}
+
+module.exports = {
+    getAllConversations,
+    getMessagesByConversationId,
+    startConversation,
+    getConversationById,
+    createMessageInConversation,
+    getConversationByContactNumber
+}
