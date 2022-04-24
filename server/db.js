@@ -1,12 +1,18 @@
 const sqlite3 = require('@vscode/sqlite3')
 const sqlite = require('sqlite')
+const fs = require('fs')
+const dbFilePath = '../.data/db.sqlite'
+const seedFilePath = './dbseed.sql'
 
-const openDb = sqlite.open(
-    {
-        filename: '../.data/db.sqlite',
-        driver: sqlite3.Database
-    }
-)
+const openDb = sqlite.open({
+    filename: dbFilePath,
+    driver: sqlite3.Database
+}).then( async (db) => {
+    const dbSeedScript = fs.readFileSync(seedFilePath, 'utf-8')
+    console.log('Running db seed script to ensure tables exist', dbSeedScript)
+    await db.exec(dbSeedScript)
+    return db
+})
 
 const getAllConversations = async () => {
     const db = await openDb
