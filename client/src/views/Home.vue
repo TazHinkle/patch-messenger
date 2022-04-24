@@ -102,12 +102,9 @@
             :key="message.message_id"
             cols="12"
           >
-            <v-card
-              :color="pickColor(message.is_incoming)"
-            >
-              <v-subheader>{{ convertTimestamp(message.timestamp) }}</v-subheader>
-              <v-card-text>{{ message.message_body }}</v-card-text>
-            </v-card>
+            <MessageCard
+              :message="message"
+            ></MessageCard>
           </v-col>
         </v-row>
       </v-container>
@@ -149,7 +146,9 @@
   </v-app>
 </template>
 <script>
+import MessageCard from '@/components/ComponentMessageCard'
 export default {
+  components: { MessageCard },
   data () {
     return {
       conversations: [],
@@ -160,12 +159,15 @@ export default {
       addMessage: '',
       response: '',
       error: '',
-      timer: ''
+      conversationTimer: '',
+      messageTimer: '',
+      lastMessage: ''
     }
   },
   created () {
     this.loadConversations()
-    this.timer = setInterval(this.loadConversations, 10000)
+    this.messageTimer = setInterval(this.getMessages, 10000)
+    this.conversationTimer = setInterval(this.loadConversations, 10000)
   },
   methods: {
     async loadConversations () {
@@ -175,11 +177,19 @@ export default {
       this.conversations = await response.json()
       console.log(response)
     },
+    async getMessages () {
+      if (this.selectedConversation !== '') {
+        const response = await fetch(`/api/conversations/${this.selectedConversation}/messages`)
+        this.messages = await response.json()
+        if (this.messages.length > 0) {
+          this.lastMessage = 'message' + this.messages[this.messages.length - 1].message_id
+        }
+      }
+    },
     async selectConversation (conversationId) {
       this.selectedConversation = conversationId
-      const response = await fetch(`/api/conversations/${conversationId}/messages`)
-      this.messages = await response.json()
-      this.loadConversations()
+      await this.getMessages()
+      await this.loadConversations()
     },
     validateNumber () {
       const reg = /^\+1[0-9]{10}$/g
@@ -210,10 +220,6 @@ export default {
       } else {
         this.error = 'Must be a valid phone number prefaced by a +'
       }
-    },
-    convertTimestamp (timestamp) {
-      const day = new Date(timestamp)
-      return '' + day.toLocaleDateString('en-US') + ' ' + day.toTimeString()
     },
     async sendMessage () {
       console.log(this.addMessage)
