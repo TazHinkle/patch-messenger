@@ -1,14 +1,51 @@
-require('dotenv').config();
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
+require('dotenv').config()
+const accountSid = process.env.TWILIO_ACCOUNT_SID
+const authToken = process.env.TWILIO_AUTH_TOKEN
+const client = require('twilio')(accountSid, authToken)
 const twilioPhone = process.env.TWILIO_PHONE_OUT
+const simplePassword = process.env.SIMPLE_PASSWORD
 const Koa = require('koa')
 const app = new Koa()
 const Router = require('koa-router')
 const staticServe = require('koa-static')
+const session = require('koa-session')
 const router = new Router()
-const db = require('./db.js');
+const db = require('./db.js')
+// session cookies require a unique secret key
+app.keys = [simplePassword]
+
+router.post('/api/auth', async (ctx) => {
+    const inputPassword = ctx.request.body.password
+    if(inputPassword === simplePassword) {
+        ctx.session.authorized = true
+        ctx.response.status = 200
+        ctx.body = { success: true }
+    } else {
+        ctx.response.status = 403
+        ctx.body = { success: false }
+    }
+})
+
+router.get('/api/auth', async (ctx) => {
+    if(ctx.session.authorized) {
+        ctx.response.status = 200
+        ctx.body = { success: true }
+    } else {
+        ctx.response.status = 403
+        ctx.body = { success: false }
+    }
+})
+
+const authBouncer = async (ctx, next) => {
+    if(!ctx.session.authorized) {
+        ctx.response.status = 403
+        ctx.body = { error: 'Not Authorized' }
+    } else {
+        await next()
+    }
+}
+
+router.use('/api/', authBouncer)
 
 router.get('/api/conversations', async (ctx) => {
     ctx.body = await db.getAllConversations()
@@ -35,7 +72,7 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     const conversation = await db.getConversationById(conversationId)
     const recipientNumber = conversation.contact_number
     if(message) {
-        console.log('recipientNumber', recipientNumber);
+        console.log('recipientNumber', recipientNumber)
         try {
             const twilioResponse = await client.messages
                 .create({
@@ -63,13 +100,13 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
         ctx.body = {
             status: 'error',
             error: 'message is required'
-        };
+        }
     }
 })
 
 router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
-    console.log('incoming webhook request', ctx.request.body);
-    const message = ctx.request.body.Body;
+    console.log('incoming webhook request', ctx.request.body)
+    const message = ctx.request.body.Body
     const timestamp = Date.now()
     const conversation = await db.getConversationByContactNumber(ctx.request.body.From)
     const conversationId = conversation.conversation_id
@@ -81,12 +118,13 @@ router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
     )
     ctx.response.status = 200
     ctx.body = result
-});
+})
 
+app.use(session(app))
 app.use(require('koa-body')())
 app.use(router.allowedMethods())
 app.use(router.routes())
-app.use(staticServe('../client/dist'));
+app.use(staticServe('../client/dist'))
 
 app.listen(3000, () => {
     console.log('server started on port 3000')

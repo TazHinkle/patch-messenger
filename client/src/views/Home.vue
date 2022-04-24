@@ -1,5 +1,9 @@
 <template>
   <v-app id="inspire">
+    <auth-dialog
+      :value="!authenticated"
+      @submit="login"
+    />
     <v-navigation-drawer
       app
       permanent
@@ -102,9 +106,9 @@
             :key="message.message_id"
             cols="12"
           >
-            <MessageCard
+            <message-card
               :message="message"
-            ></MessageCard>
+            />
           </v-col>
         </v-row>
       </v-container>
@@ -146,9 +150,10 @@
   </v-app>
 </template>
 <script>
-import MessageCard from '@/components/ComponentMessageCard'
+import MessageCard from '@/components/MessageCard'
+import AuthDialog from '@/components/AuthDialog'
 export default {
-  components: { MessageCard },
+  components: { AuthDialog, MessageCard },
   data () {
     return {
       conversations: [],
@@ -161,26 +166,50 @@ export default {
       error: '',
       conversationTimer: '',
       messageTimer: '',
-      lastMessage: ''
+      lastMessage: '',
+      authenticated: false
     }
   },
   created () {
-    this.loadConversations()
-    this.messageTimer = setInterval(this.getMessages, 10000)
-    this.conversationTimer = setInterval(this.loadConversations, 10000)
+    this.checkAuth()
   },
   methods: {
+    login (password) {
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password
+        })
+      }
+      this.checkAuth(requestOptions)
+    },
+    async checkAuth (requestOptions) {
+      const response = await fetch(
+        '/api/auth',
+        requestOptions
+      )
+      const result = await response.json()
+      if (result.success) {
+        this.authenticated = true
+        this.startTimers()
+      }
+    },
+    startTimers () {
+      this.loadConversations()
+      this.messageTimer = setInterval(this.getMessages, 10000)
+      this.conversationTimer = setInterval(this.loadConversations, 10000)
+    },
     async loadConversations () {
       const response = await fetch(
         '/api/conversations'
       )
       this.conversations = await response.json()
-      console.log(response)
     },
     async getMessages () {
       if (this.selectedConversation !== '') {
         const response = await fetch(`/api/conversations/${this.selectedConversation}/messages`)
-        this.messages = await response.json()
+        this.messages = await response.json() || []
         if (this.messages.length > 0) {
           this.lastMessage = 'message' + this.messages[this.messages.length - 1].message_id
         }
