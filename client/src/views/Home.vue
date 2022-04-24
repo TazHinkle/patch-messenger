@@ -25,37 +25,41 @@
               </v-icon>
             </v-btn>
           </template>
-          <v-card>
-            <v-card-title>Enter a Phone Number</v-card-title>
-            <v-divider></v-divider>
-            <v-card-text style="height: 300px;">
-              <v-text-field
-                label="Start a new conversation"
-                hint="Valid phone numbers must be prefaced with +1"
-                persistent-hint
-                required
-                v-model="newContactNumber"
-              ></v-text-field>
-              <span v-if="error" class="error--text">{{ error }}</span>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="addNewConvo = !addNewConvo"
-              >
-                Close
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="startConversation"
-              >
-                Create
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+          <v-form
+            @submit.prevent="startConversation"
+          >
+            <v-card>
+              <v-card-title>Enter a Phone Number</v-card-title>
+              <v-divider></v-divider>
+              <v-card-text style="height: 300px;">
+                <v-text-field
+                  label="Start a new conversation"
+                  hint="Valid phone numbers must be prefaced with +1"
+                  persistent-hint
+                  required
+                  v-model="newContactNumber"
+                ></v-text-field>
+                <span v-if="error" class="error--text">{{ error }}</span>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-btn
+                  color="blue darken-1"
+                  text
+                  @click="addNewConvo = !addNewConvo"
+                >
+                  Close
+                </v-btn>
+                <v-btn
+                  color="blue darken-1"
+                  text
+                  type="submit"
+                >
+                  Create
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-form>
         </v-dialog>
       </v-row>
       <br />
@@ -130,7 +134,6 @@
               <v-text-field
                 label="Send a new message"
                 v-model="addMessage"
-                @keyup.enter="sendMessage"
                 append-outer-icon="mdi-send"
                 @click:append-outer="sendMessage"
                 dense
