@@ -92,7 +92,9 @@
             :key="message.message_id"
             cols="12"
           >
-            <v-card>
+            <v-card
+              :color="pickColor(message.is_incoming)"
+            >
               <v-subheader>{{ convertTimestamp(message.timestamp) }}</v-subheader>
               <v-card-text>{{ message.message_body }}</v-card-text>
             </v-card>
@@ -148,11 +150,13 @@ export default {
       newContactNumber: '+1',
       addMessage: '',
       response: '',
-      error: ''
+      error: '',
+      timer: ''
     }
   },
   created () {
     this.loadConversations()
+    this.timer = setInterval(this.loadConversations, 10000);
   },
   methods: {
     async loadConversations () {
@@ -224,6 +228,9 @@ export default {
       } else {
         this.error = 'You must select a conversation and type a message'
       }
+    },
+    pickColor (incoming) {
+      return incoming ? 'blue' : 'gray'
     }
   }
 }

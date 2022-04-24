@@ -51,14 +51,9 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
                     conversationId,
                     false
                 )
-
                 ctx.response.status = 200
                 ctx.body = result
             })
-            .catch((error) => {
-                ctx.response.status = 500
-                ctx.body = error
-            });
     }else {
         ctx.response.status = 400
         ctx.body({
@@ -67,6 +62,22 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
         });
     }
 })
+
+router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
+    console.log('incoming webhook request', ctx.request.body);
+    const message = ctx.request.body.Body;
+    const timestamp = Date.now()
+    const conversation = await db.getConversationByContactNumber(ctx.request.body.From)
+    const conversationId = conversation.conversation_id
+    const result = await db.createMessageInConversation(
+        message,
+        timestamp,
+        conversationId,
+        true
+    )
+    ctx.response.status = 200
+    ctx.body = result
+});
 
 app.use(require('koa-body')())
 app.use(router.allowedMethods())
