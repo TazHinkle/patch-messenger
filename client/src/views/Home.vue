@@ -244,9 +244,23 @@ export default {
         this.error = 'You must select a conversation and type a message'
       }
     },
-    pickColor (incoming) {
-      return incoming ? 'blue' : 'gray'
+    goToSection () {
+      if (this.lastMessage) {
+        this.$nextTick().then(() => {
+          const scrollToElement = document.getElementById(this.lastMessage)
+          if (scrollToElement) {
+            this.$vuetify.goTo(scrollToElement, {
+              duration: 300,
+              offset: 0,
+              easing: 'easeInOutCubic'
+            })
+          }
+        })
+      }
     }
+  },
+  watch: {
+    messages: 'goToSection'
   }
 }
 </script>
