@@ -1,8 +1,14 @@
 const sqlite3 = require('@vscode/sqlite3')
 const sqlite = require('sqlite')
 const fs = require('fs')
+const dataDirPath = '../.data'
+const dataDirExists = fs.existsSync(dataDirPath)
 const dbFilePath = '../.data/db.sqlite'
 const seedFilePath = './dbseed.sql'
+
+if(!dataDirExists) {
+    fs.mkdirSync(dataDirPath)
+}
 
 const openDb = sqlite.open({
     filename: dbFilePath,

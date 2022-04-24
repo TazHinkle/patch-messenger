@@ -4,7 +4,8 @@
   "description": "2 way SMS messenger app",
   "main": "server/server.js",
   "scripts": {
-    "api": "cd server && node server.js"
+    "api": "cd server && yarn run start",
+    "build_client": "cd client && yarn run build"
   },
   "workspaces": [
     "client",
