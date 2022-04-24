@@ -35,31 +35,34 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     const recipientNumber = conversation.contact_number
     if(message) {
         console.log('recipientNumber', recipientNumber);
-        await client.messages
-            .create({
-                body: message,
-                from: twilioPhone,
-                to: recipientNumber
-            })
-            .then(async (twilioResponse) => {
-                console.log(twilioResponse.sid)
-                const message = twilioResponse.body
-                const timestamp = new Date(twilioResponse.dateUpdated).getTime()
-                const result = await db.createMessageInConversation(
-                    message,
-                    timestamp,
-                    conversationId,
-                    false
-                )
-                ctx.response.status = 200
-                ctx.body = result
-            })
+        try {
+            const twilioResponse = await client.messages
+                .create({
+                    body: message,
+                    from: twilioPhone,
+                    to: recipientNumber
+                })
+            console.log(twilioResponse.sid)
+            const responseMessage = twilioResponse.body
+            const timestamp = new Date(twilioResponse.dateUpdated).getTime()
+            const result = await db.createMessageInConversation(
+                responseMessage,
+                timestamp,
+                conversationId,
+                false
+            )
+            ctx.response.status = 200
+            ctx.body = result
+        } catch (error) {
+            ctx.response.status = 400
+            ctx.body = error
+        }
     }else {
         ctx.response.status = 400
-        ctx.body({
+        ctx.body = {
             status: 'error',
             error: 'message is required'
-        });
+        };
     }
 })
 

@@ -73,6 +73,12 @@
           <v-list-item-content>
             <v-list-item-title>
               {{ conversation.contact_number }}
+              <v-badge
+                v-if="conversation.unread_message_count > 0"
+                color="green"
+                class="pa-1"
+              >
+              </v-badge>
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -156,7 +162,7 @@ export default {
   },
   created () {
     this.loadConversations()
-    this.timer = setInterval(this.loadConversations, 10000);
+    this.timer = setInterval(this.loadConversations, 10000)
   },
   methods: {
     async loadConversations () {
