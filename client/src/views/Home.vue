@@ -194,7 +194,7 @@ export default {
       }
     },
     async selectConversation (conversationId) {
-      this.selectedConversation = conversationId
+      this.selectedConversation = '' + conversationId
       await this.getMessages()
       await this.loadConversations()
     },
@@ -217,7 +217,7 @@ export default {
           requestOptions
         )
         this.response = await response.json()
-        this.selectedConversation = this.response.conversation_id
+        this.selectedConversation = '' + this.response.conversation_id
         this.conversations.push(this.response)
         this.newContactNumber = '+1'
         this.messages = []
@@ -227,7 +227,6 @@ export default {
       }
     },
     async sendMessage () {
-      console.log(this.addMessage)
       this.error = ''
       if (this.selectedConversation && this.addMessage) {
         const requestOptions = {
@@ -242,7 +241,6 @@ export default {
           requestOptions
         )
         const result = await response.json()
-        console.log(result)
         this.messages.push(result)
         this.addMessage = ''
       } else {

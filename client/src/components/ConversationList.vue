@@ -4,7 +4,7 @@
       v-for="conversation in conversations"
       :key="conversation.conversation_id"
       :conversation="conversation"
-      :selected="selectedConversation === conversation.conversation_id"
+      :selected="selectedConversation === '' + conversation.conversation_id"
       @select-conversation="$emit('select-conversation', $event)"
     />
   </v-list>

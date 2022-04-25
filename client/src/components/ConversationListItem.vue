@@ -9,7 +9,7 @@
       <v-list-item-title>
         {{ conversation.contact_number }}
         <v-badge
-          v-if="conversation.unread_message_count"
+          v-if="conversation.unread_message_count > 0"
           color="green"
           class="pa-1"
         >

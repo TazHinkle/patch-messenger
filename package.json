@@ -5,7 +5,8 @@
   "main": "server/server.js",
   "scripts": {
     "api": "cd server && yarn run start",
-    "build_client": "cd client && yarn run build"
+    "build_client": "cd client && yarn run build",
+    "web_serve": "cd client && yarn run serve"
   },
   "workspaces": [
     "client",

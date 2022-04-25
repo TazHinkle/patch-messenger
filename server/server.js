@@ -17,7 +17,7 @@ const db = require('./db.js')
 app.keys = [simplePassword]
 
 router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
-    console.log('incoming webhook request', ctx.request.body)
+
     const message = ctx.request.body.Body
     const timestamp = Date.now()
     const conversation = await db.getConversationByContactNumber(ctx.request.body.From)
@@ -90,14 +90,14 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     const conversation = await db.getConversationById(conversationId)
     const recipientNumber = conversation.contact_number
     if(message) {
-        console.log('recipientNumber', recipientNumber)
+
         try {
             const twilioResponse = await twilioClient.messages.create({
                 body: message,
                 from: twilioPhone,
                 to: recipientNumber
             })
-            console.log(twilioResponse.sid)
+
             const responseMessage = twilioResponse.body
             const timestamp = new Date(twilioResponse.dateUpdated).getTime()
             const result = await db.createMessageInConversation(
