@@ -92,12 +92,11 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     if(message) {
         console.log('recipientNumber', recipientNumber)
         try {
-            const twilioResponse = await twilioClient.messages
-                .create({
-                    body: message,
-                    from: twilioPhone,
-                    to: recipientNumber
-                })
+            const twilioResponse = await twilioClient.messages.create({
+                body: message,
+                from: twilioPhone,
+                to: recipientNumber
+            })
             console.log(twilioResponse.sid)
             const responseMessage = twilioResponse.body
             const timestamp = new Date(twilioResponse.dateUpdated).getTime()
@@ -113,7 +112,7 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
             ctx.response.status = 400
             ctx.body = error
         }
-    }else {
+    } else {
         ctx.response.status = 400
         ctx.body = {
             status: 'error',

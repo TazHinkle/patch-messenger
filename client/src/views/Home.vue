@@ -34,7 +34,7 @@
           >
             <v-card>
               <v-card-title>Enter a Phone Number</v-card-title>
-              <v-divider></v-divider>
+              <v-divider />
               <v-card-text style="height: 300px;">
                 <v-text-field
                   label="Start a new conversation"
@@ -42,10 +42,10 @@
                   persistent-hint
                   required
                   v-model="newContactNumber"
-                ></v-text-field>
+                />
                 <span v-if="error" class="error--text">{{ error }}</span>
               </v-card-text>
-              <v-divider></v-divider>
+              <v-divider />
               <v-card-actions>
                 <v-btn
                   color="blue darken-1"
@@ -67,7 +67,7 @@
         </v-dialog>
       </v-row>
       <br />
-      <v-divider></v-divider>
+      <v-divider />
       <conversation-list
         :conversations="conversations"
         :selectedConversation="selectedConversation"
@@ -107,11 +107,14 @@
                 append-outer-icon="mdi-send"
                 @click:append-outer="sendMessage"
                 dense
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
           <v-row>
-            <span v-if="error && !selectedConversation" class="error--text">{{ error }}</span>
+            <span
+              v-if="error && !selectedConversation"
+              class="error--text"
+            >{{ error }}</span>
           </v-row>
         </v-container>
       </v-form>
