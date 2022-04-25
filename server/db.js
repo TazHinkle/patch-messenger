@@ -43,7 +43,11 @@ const getConversationByContactNumber = async (contact_number) => {
     statement.bind({
         '@contact_number': contact_number,
     })
-    return statement.get()
+    let conversation = await statement.get()
+    if(!conversation) {
+        conversation = await startConversation(contact_number)
+    }
+    return conversation
 }
 
 const getMessagesByConversationId = async (conversation_id) => {
