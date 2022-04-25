@@ -1,16 +1,18 @@
 require('dotenv').config()
 const accountSid = process.env.TWILIO_ACCOUNT_SID
 const authToken = process.env.TWILIO_AUTH_TOKEN
-const client = require('twilio')(accountSid, authToken)
 const twilioPhone = process.env.TWILIO_PHONE_OUT
 const simplePassword = process.env.SIMPLE_PASSWORD
+const twilioClient = require('twilio')(accountSid, authToken)
 const Koa = require('koa')
 const app = new Koa()
-const Router = require('koa-router')
-const staticServe = require('koa-static')
-const session = require('koa-session')
-const router = new Router()
+const KoaRouter = require('koa-router')
+const koaBody = require('koa-body')
+const koaServe = require('koa-static')
+const koaSession = require('koa-session')
+const router = new KoaRouter()
 const db = require('./db.js')
+
 // session cookies require a unique secret key
 app.keys = [simplePassword]
 
@@ -90,7 +92,7 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     if(message) {
         console.log('recipientNumber', recipientNumber)
         try {
-            const twilioResponse = await client.messages
+            const twilioResponse = await twilioClient.messages
                 .create({
                     body: message,
                     from: twilioPhone,
@@ -120,11 +122,11 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
     }
 })
 
-app.use(session(app))
-app.use(require('koa-body')())
+app.use(koaSession(app))
+app.use(koaBody())
 app.use(router.allowedMethods())
 app.use(router.routes())
-app.use(staticServe('../client/dist'))
+app.use(koaServe('../client/dist'))
 
 app.listen(3000, () => {
     console.log('server started on port 3000')
