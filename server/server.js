@@ -14,6 +14,22 @@ const db = require('./db.js')
 // session cookies require a unique secret key
 app.keys = [simplePassword]
 
+router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
+    console.log('incoming webhook request', ctx.request.body)
+    const message = ctx.request.body.Body
+    const timestamp = Date.now()
+    const conversation = await db.getConversationByContactNumber(ctx.request.body.From)
+    const conversationId = conversation.conversation_id
+    const result = await db.createMessageInConversation(
+        message,
+        timestamp,
+        conversationId,
+        true
+    )
+    ctx.response.status = 200
+    ctx.body = result
+})
+
 router.post('/api/auth', async (ctx) => {
     const inputPassword = ctx.request.body.password
     if(inputPassword === simplePassword) {
@@ -102,22 +118,6 @@ router.post('/api/conversations/:conversation_id/send', async (ctx) => {
             error: 'message is required'
         }
     }
-})
-
-router.post('/api/twilio_incoming_message_webhook', async(ctx) => {
-    console.log('incoming webhook request', ctx.request.body)
-    const message = ctx.request.body.Body
-    const timestamp = Date.now()
-    const conversation = await db.getConversationByContactNumber(ctx.request.body.From)
-    const conversationId = conversation.conversation_id
-    const result = await db.createMessageInConversation(
-        message,
-        timestamp,
-        conversationId,
-        true
-    )
-    ctx.response.status = 200
-    ctx.body = result
 })
 
 app.use(session(app))
