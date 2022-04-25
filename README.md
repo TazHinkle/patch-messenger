@@ -2,8 +2,8 @@
 
 ## Running locally
 
-- run `yarn run api`
-- run `your run web_serve`
+- To start the api run `yarn run api`
+- To start the web server run `yarn run web_serve`
 
 ## Running with Docker/AWS
 
