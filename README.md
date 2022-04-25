@@ -2,8 +2,11 @@
 
 ## Running locally
 
-- To start the api run `yarn run api`
-- To start the web server run `yarn run web_serve`
+- `yarn` to install all dependencies
+- copy `server/.env.example` to `server/.env` and replace each value appropriately
+- turn on the api with `yarn run api`
+- turn on the client with `yarn run web_serve`
+- visit http://localhost:8080
 
 ## Running with Docker/AWS
 
