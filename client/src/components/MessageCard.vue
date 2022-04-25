@@ -1,11 +1,25 @@
 <template>
-  <v-card
-    :color="pickColor"
-    :id="'message' + message.message_id"
-  >
-    <v-subheader>{{ convertTimestamp }}</v-subheader>
-    <v-card-text>{{ message.message_body }}</v-card-text>
-  </v-card>
+  <v-row>
+    <v-col
+      cols="3"
+      v-if="!message.is_incoming"
+    ></v-col>
+    <v-col
+      cols="9"
+    >
+      <v-card
+        :color="pickColor"
+        :id="'message' + message.message_id"
+      >
+        <v-subheader>{{ convertTimestamp }}</v-subheader>
+        <v-card-text>{{ message.message_body }}</v-card-text>
+      </v-card>
+    </v-col>
+    <v-col
+      cols="3"
+      v-if="message.is_incoming"
+    ></v-col>
+  </v-row>
 </template>
 <script>
 export default {

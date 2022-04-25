@@ -68,50 +68,19 @@
       </v-row>
       <br />
       <v-divider></v-divider>
-
-      <v-list>
-        <v-list-item
-          v-for="conversation in conversations"
-          :key="conversation.conversation_id"
-          @click="selectConversation(conversation.conversation_id)"
-          :id="'conversation-button-'+conversation.conversation_id"
-          :disabled="selectedConversation === conversation.conversation_id"
-          link
-        >
-          <v-list-item-content>
-            <v-list-item-title>
-              {{ conversation.contact_number }}
-              <v-badge
-                v-if="conversation.unread_message_count > 0"
-                color="green"
-                class="pa-1"
-              >
-              </v-badge>
-            </v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+      <conversation-list
+        :conversations="conversations"
+        :selectedConversation="selectedConversation"
+        @select-conversation="selectConversation"
+      />
     </v-navigation-drawer>
 
     <v-main
-      class="pb-0"
+      class="pa-0"
     >
-      <v-container
-        class="py-8 px-6"
-        fluid
-      >
-        <v-row>
-          <v-col
-            v-for="message in messages"
-            :key="message.message_id"
-            cols="12"
-          >
-            <message-card
-              :message="message"
-            />
-          </v-col>
-        </v-row>
-      </v-container>
+      <message-list
+        :messages="messages"
+      />
     </v-main>
     <v-footer
       app
@@ -150,10 +119,16 @@
   </v-app>
 </template>
 <script>
-import MessageCard from '@/components/MessageCard'
 import AuthDialog from '@/components/AuthDialog'
+import ConversationList from '@/components/ConversationList'
+import MessageList from '@/views/MessageList'
+
 export default {
-  components: { AuthDialog, MessageCard },
+  components: {
+    MessageList,
+    ConversationList,
+    AuthDialog
+  },
   data () {
     return {
       conversations: [],
@@ -239,9 +214,7 @@ export default {
           requestOptions
         )
         this.response = await response.json()
-        console.log(this.response)
         this.selectedConversation = this.response.conversation_id
-        console.log(this.selectedConversation)
         this.conversations.push(this.response)
         this.newContactNumber = '+1'
         this.messages = []
